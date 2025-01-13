@@ -46,4 +46,6 @@ Weekday commits: 376, Weekend commits: 81
 ```
 
 ### 可视化图表
-![]()
+设定时间为2025-1-13到2024-10-15
+![](https://github.com/Ekroner/OpenSourceSoftware-hw/blob/09132e27375fe41b4e26657aa647ecd17faf1df2/commitAnalysis/commit_frequency.png)
+![](https://github.com/Ekroner/OpenSourceSoftware-hw/blob/09132e27375fe41b4e26657aa647ecd17faf1df2/commitAnalysis/contributor_activity.png)
