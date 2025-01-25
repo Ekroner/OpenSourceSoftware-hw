@@ -1,5 +1,4 @@
-﻿
-# Django 项目提交历史分析工具设计文档
+﻿# Django 项目提交历史分析工具设计文档
 
 ## 1. 系统架构设计
 采用 **模块化分层架构**，分为以下核心模块：
@@ -27,7 +26,6 @@
           commits.extend(data)
           page += 1
       return commits
-      
 ### 2.2 数据分析模块
 - **功能**：提取提交频率、贡献者活跃度、工作日/周末提交分布。
 - **子功能**：
@@ -42,7 +40,6 @@
           date = commit['commit']['author']['date'][:10]  # 提取日期
           daily_commits[date] += 1
       return daily_commits
- 
  ### 2.3 可视化模块
 - **功能**：生成图表展示分析结果，直观呈现数据统计信息。
 - **图表类型**：
@@ -92,8 +89,7 @@
       
       plt.tight_layout()
       plt.savefig('contributor_activity.png', dpi=300, bbox_inches='tight')
-      plt.close()
-      
+      plt.close()    
 ### 2.4 主控模块
 - **功能**：作为程序入口，协调数据采集、分析和可视化流程的完整执行。
 - **核心职责**：
@@ -129,7 +125,6 @@
 
   if __name__ == "__main__":
       main()  # 程序入口
-      
 ## 3. 数据流设计
 ### 3.1 输入数据
 - **来源**：GitHub API 返回的 JSON 格式提交数据。
@@ -253,12 +248,10 @@
 
     # 3. 转换为 PDF（可选）
     pdfkit.from_file('report.html', 'report.pdf')
-    数据导出功能
-    结构化数据导出：
-    支持将分析结果保存为 CSV/JSON 文件，供其他工具（如 Excel、Tableau）进一步处理。
-
-    python
-    复制
+### 数据导出功能
+- **结构化数据导出**：
+  支持将分析结果保存为 CSV/JSON 文件，供其他工具（如 Excel、Tableau）进一步处理。
+    ```python
     import pandas as pd
 
     # 提交频率数据导出为 CSV
@@ -272,12 +265,10 @@
     import json
     with open('contributors.json', 'w') as f:
         json.dump(contributor_activity, f)
-    扩展配置
-    输出目录管理：
-    通过代码指定输出路径，避免文件散落。
-
-    python
-    复制
+### 扩展配置
+- **输出目录管理**：
+  通过代码指定输出路径，避免文件散落。
+    ```python
     import os
     output_dir = "reports/2023-09"
     os.makedirs(output_dir, exist_ok=True)
@@ -289,7 +280,6 @@
     filename = f"commit_analysis_{start_date}_to_{end_date}.html"
     with open(filename, 'w') as f:
         f.write(html_content)
-        
 ## 示例输出
     ```plaintext
     [1/4] Fetching commit history...
@@ -303,5 +293,3 @@
 
     Analysis completed successfully!
     Report saved to: C:\Users\Ekroner\OpenSourceSoftware-hw\commitAnalysis\analysis_reports\report_20250125_1445
-    
-
