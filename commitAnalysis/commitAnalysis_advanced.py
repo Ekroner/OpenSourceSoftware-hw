@@ -9,7 +9,7 @@ from jinja2 import Template
 import pdfkit
 
 # ==================== 配置部分 ====================
-GITHUB_TOKEN = "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"  # 替换为你的GitHub Token
+GITHUB_TOKEN = "YOUR_TOKEN"  # 替换为你的GitHub Token
 REPO_OWNER = "django"
 REPO_NAME = "django"
 OUTPUT_DIR = "analysis_reports"
