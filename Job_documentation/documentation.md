@@ -365,7 +365,7 @@ django/django\utils\choices.py:
 ```
 # Django的bug 分析
 
-# 总述
+## 总述
 
 本次对Djgango的bug进行了分析。分别统计了djangoproject.com项目里的所有已修复bug和channels项目里自2018.3.30开始的已修复bug。
 ## 过程
@@ -373,9 +373,33 @@ django/django\utils\choices.py:
 在Django github bug issues里对上述bug进行bug描述、bug类型、开始时间、结束时间、修复耗时、修复bug中值得注意的事件进行统计并通过excel进行保存。因github对bug的优先级没有分类标签所以无法统计。
 Bug类型共分为7类:功能性bug、界面类bug、兼容性bug、性能类bug、安全性bug、易用性bug、其他bug。
 bug的生命周期的统计依靠github bug issues的时间轴和相关人员的讨论和描述，其中有许多英语专业术语，对bug的描述和结束时间可能存在一定的理解偏差。
+## 实现原理
+```
+import requests
+
+# GitHub API 端点
+url = 'https://api.github.com/repos/django/djangoproject.com/issues'
+#url = 'https://api.github.com/repos/django/channels/issues'
+params = {'labels': 'bug'}  # 只获取带有 bug 标签的 issue
+
+# 发起请求
+response = requests.get(url, params=params)
+
+# 检查请求是否成功
+if response.status_code == 200:
+    issues = response.json()
+    bug_count = len(issues)  # 统计 bug 的数量
+    print(f'Bug 数量：{bug_count}')
+else:
+    print('请求失败', response.status_code)
+
+
+```
 ## 结果
 Djangoproject.com:36个bug
+
 ![](bug1.png)
+
 ![](bug2.png)
 特殊事件：
 + 有三个不同时候发现的搜索bug通过更换搜索引擎同时解决。
@@ -383,6 +407,7 @@ Djangoproject.com:36个bug
 + 2个其他bug为未及时更新项目成员信息,且报告后均过了100天以上才更新。
 
 Channels:26个bug
+
 ![](bug3.png)
 ![](bug4.png)
 特殊事件：
@@ -390,7 +415,7 @@ Channels:26个bug
 + 有2个bug修复后又出现新问题,其中一个被重列为bug并解决,另一个因信息不足而未被列为bug。
 +	1个其他bug为教程与实际使用的版本不同,通过修改教程解决。
 +	1个bug经过长久的讨论在6年后被解决并作为了channels的更新。
-# 结论
+## 结论
 项目类型不同导致bug类型也有所不同。Djangoproject.com作为一个网站有许多界面类bug。而Channels作为Django框架中用于处理WebSocket和后台任务的工具有更多兼容性bug和易用性bug。
 导致修复bug时间过长的原因有:
 +	Bug修复后又出现新的相同bug。
@@ -398,6 +423,63 @@ Channels:26个bug
 +	负责该bug模块的工程师正忙于其它的工作导致没有时间及时修复该bug。
 +	Bug对项目的运行没有多少影响。
 通过对Django相关项目的bug研究,我发现项目的每个模块分工明确。其他人员会汇报bug并给出建议，负责该模块的工程师会主动着手修复或申请被指派任务并决定bug的生命周期。同时，bug的认定和修复流程非常严格。Bug的提交需要对bug进行具体描述并缩小导致bug的代码范围，Bug也会在修复后再出错被重新开启。对bug issues的认真对待，可能也是一个项目能否良好运转的重要因素。
+# URL 路由系统对某些 Unicode 路径的处理可能导致未定义行为
+
+## 描述：
+
+在使用模糊测试对 Django 的 URL 路由系统进行测试时，发现某些 Unicode 路径可能导致未定义行为或潜在安全问题。虽然大多数 Unicode 路径被正确处理并返回 200 状态码，但仍需进一步验证是否存在异常情况。
+
+## 复现步骤：
+
+### 使用以下代码对 Django 的 URL 路由系统进行模糊测试：
+
+  ```
+  import os
+  import sys
+  import django
+  import logging
+  from hypothesis import given, strategies as st
+  from django.test import Client
+  
+  # 设置 Django 环境
+  sys.path.append(os.path.dirname(os.path.abspath(__file__)))
+  os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'djangoTestdjango.settings')
+  django.setup()
+  
+  # 配置日志
+  logging.basicConfig(level=logging.INFO)
+  
+  # 初始化测试客户端
+  client = Client()
+  
+  # 定义测试函数
+  @given(st.text(alphabet=st.characters(blacklist_categories=('Cc', 'Cs')), max_size=200))
+  def test_url_parsing(path):
+      logging.info(f"Testing path: {path}")
+      response = client.get(f'/{path}')
+      logging.info(f"Response status code: {response.status_code}")
+      assert response.status_code in [200, 404, 400]
+  
+  # 运行测试
+  if __name__ == "__main__":
+      test_url_parsing()
+  ```
+
+### 运行测试，观察日志输出。
+
+  运行结果如下图：
+
+  ![](Unicode.jpg)
+
+###  某些 Unicode 路径（如 `񿶔`、`󍋕æóJ`）被正确处理并返回 200 状态码，但需要进一步验证是否存在异常情况。
+
+## 预期行为：
+
+Django 应正确处理所有 Unicode 路径，并返回适当的状态码（200、404 或 400）。如果路径无效或存在安全问题，应返回 404 或 400。
+
+## 实际行为：
+
+大多数 Unicode 路径被正确处理并返回 200 状态码，但需要进一步验证是否存在异常情况。
 
 
 
